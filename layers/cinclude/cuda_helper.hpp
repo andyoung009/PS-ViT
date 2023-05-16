@@ -1,3 +1,4 @@
+// 这段代码是一个CUDA的helper文件，包含了一些CUDA的宏定义和函数。其中，CUDA_1D_KERNEL_LOOP是一个宏定义，用于在CUDA kernel中进行循环迭代。
 #ifndef CUDA_HELPER
 #define CUDA_HELPER
 
@@ -14,13 +15,21 @@ using at::Tensor;
 using phalf = at::Half;
 
 #define __PHALF(x) (x)
+// 这些函数都是在CUDA中执行的，因此需要使用CUDA的数据类型和函数。此外，该文件还包含了一些头文件和命名空间的引用，如cuda.h、ATen、THC等。
+// 这些头文件和命名空间提供了在CUDA中使用的一些函数和数据类型。
 
+// 这是一个 CUDA 宏，用于定义一个循环，遍历一个一维线程网格。 
+// 该宏接受两个参数：`i` 是循环变量，`n` 是循环迭代次数。 
+// 循环使用线程索引 `blockIdx.x`、块维度 `blockDim.x` 和块内线程索引 `threadIdx.x` 遍历一维线程网格。
+// 循环从 `blockIdx.x * blockDim.x + threadIdx.x` 开始，每次增加 `blockDim.x * gridDim.x`，直到达到 `(n)`。
+// 这个宏通常用于 CUDA 内核中，以跨多个线程并行计算。通过使用这样的循环，每个线程可以执行计算的不同部分，从而实现更快、更高效的执行。
 #define CUDA_1D_KERNEL_LOOP(i, n)                                \
     for (int i = blockIdx.x * blockDim.x + threadIdx.x; i < (n); \
         i += blockDim.x * gridDim.x)
 
 #define THREADS_PER_BLOCK 512
 
+// GET_BLOCKS是一个函数，用于计算线程块的数量。
 inline int GET_BLOCKS(const int N)
 {
     int optimal_block_num = (N + THREADS_PER_BLOCK - 1) / THREADS_PER_BLOCK;
@@ -28,6 +37,7 @@ inline int GET_BLOCKS(const int N)
     return min(optimal_block_num, max_block_num);
 }
 
+// bilinear_interpolate和bilinear_interpolate_gradient是两个函数，用于进行双线性插值和双线性插值梯度计算。
 template <typename T>
 __device__ T bilinear_interpolate(const T *input,
                                   const int height,
@@ -72,6 +82,7 @@ __device__ T bilinear_interpolate(const T *input,
     return val;
 }
 
+// bilinear_interpolate和bilinear_interpolate_gradient是两个函数，用于进行双线性插值和双线性插值梯度计算。
 template <typename T>
 __device__ void bilinear_interpolate_gradient(const int height,
                                               const int width,
